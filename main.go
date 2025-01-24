@@ -1,35 +1,46 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 func main() {
-	rl.InitWindow(800, 450, "Snek")
+	rl.InitWindow(800, 800, "Snek")
 	defer rl.CloseWindow()
 
-	rl.SetTargetFPS(60)
-	pos := rl.Vector3{X: 0, Y: 0, Z: 0}
-	tar := rl.Vector3{X: 0, Y: 0, Z: -1}
-	up := rl.Vector3{X: 0, Y: 1, Z: 0}
-	camera := rl.NewCamera3D(pos, tar, up, 100, rl.CameraPerspective)
+	twoDimensionalCamera := rl.Camera2D{
+		Target:   rl.Vector2{X: 0, Y: 0},
+		Offset:   rl.Vector2{X: 400, Y: 400},
+		Rotation: 0,
+		Zoom:     1.0,
+	}
+
+	threeDimensionalCamera := rl.Camera3D{
+		Position:   rl.Vector3{X: 0, Y: 5, Z: -10},
+		Target:     rl.Vector3{X: 0, Y: 0, Z: 400},
+		Up:         rl.Vector3{X: 0, Y: 1, Z: 0},
+		Fovy:       90,
+		Projection: rl.CameraPerspective,
+	}
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-
-		rl.ClearBackground(rl.RayWhite)
-		rl.DrawText("Ok, now we've got a window folks!", 190, 200, 20, rl.LightGray)
-
-		vect1 := rl.Vector2{X: 0, Y: 0}
-		vect2 := rl.Vector2{X: 50, Y: 50}
-
-		tdVect1 := rl.Vector3{X: 0, Y: 0, Z: 0}
-		tdVect2 := rl.Vector3{X: 5, Y: 5, Z: 5}
-
-		if rl.IsKeyDown(rl.KeyA) {
-			rl.DrawLineV(vect1, vect2, rl.Black)
+		rl.ClearBackground(rl.White)
+		if rl.IsKeyDown(rl.KeyK) {
+			rl.BeginMode2D(twoDimensionalCamera)
+			rl.DrawLineV(rl.Vector2{X: -400, Y: 0}, rl.Vector2{X: 400, Y: 0}, rl.Black)
+			rl.DrawLineV(rl.Vector2{X: 0, Y: -400}, rl.Vector2{X: 0, Y: 400}, rl.Black)
+			rl.EndMode2D()
 		}
 		if rl.IsKeyDown(rl.KeyB) {
-			rl.BeginMode3D(camera)
-			rl.DrawCubeWiresV(tdVect1, tdVect2, rl.Black)
+			rl.UpdateCamera(&threeDimensionalCamera, rl.CameraFirstPerson)
+			rl.BeginMode3D(threeDimensionalCamera)
+			rl.DrawGrid(400, 1.0)
+			rl.DrawLine3D(
+				rl.Vector3{X: 0, Y: -400, Z: 0},
+				rl.Vector3{X: 0, Y: 400, Z: 0},
+				rl.Red)
+			rl.DrawCube(rl.Vector3{X: 0, Y: 0, Z: 0}, 1, 1, 1, rl.Blue)
 			rl.EndMode3D()
 		}
 		rl.EndDrawing()
